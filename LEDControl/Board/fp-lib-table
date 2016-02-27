@@ -1,0 +1,4 @@
+(fp_lib_table
+  (lib (name w_conn_screw)(type KiCad)(uri "D:\\Eigene Dateien\\Dokumente\\Projekte\\KiCad\\Kicad_Lib\\Footprint\\w_conn_screw.pretty")(options "")(descr ""))
+  (lib (name w_rf_modules)(type KiCad)(uri "D:\\Eigene Dateien\\Dokumente\\Projekte\\KiCad\\Kicad_Lib\\Footprint\\w_rf_modules.pretty")(options "")(descr ""))
+)

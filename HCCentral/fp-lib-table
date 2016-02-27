@@ -1,0 +1,5 @@
+(fp_lib_table
+  (lib (name mysensors_radios)(type KiCad)(uri "D:\\Eigene Dateien\\Dokumente\\Projekte\\KiCad\\Kicad_Lib\\Footprint\\mysensors_radios.pretty")(options "")(descr ""))
+  (lib (name v-reg-2)(type Legacy)(uri "D:\\Eigene Dateien\\Dokumente\\Projekte\\KiCad\\Kicad_Lib\\converted\\v-reg-2.mod")(options "")(descr ""))
+  (lib (name 78xx_neu)(type KiCad)(uri "D:\\Eigene Dateien\\Dokumente\\Projekte\\KiCad\\Kicad_Lib\\Footprint\\78xx_neu.pretty")(options "")(descr ""))
+)
