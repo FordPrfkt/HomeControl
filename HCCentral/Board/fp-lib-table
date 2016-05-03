@@ -1,5 +1,10 @@
 (fp_lib_table
-  (lib (name mysensors_radios)(type KiCad)(uri "D:\\Eigene Dateien\\Dokumente\\Projekte\\KiCad\\Kicad_Lib\\Footprint\\mysensors_radios.pretty")(options "")(descr ""))
-  (lib (name v-reg-2)(type Legacy)(uri "D:\\Eigene Dateien\\Dokumente\\Projekte\\KiCad\\Kicad_Lib\\converted\\v-reg-2.mod")(options "")(descr ""))
-  (lib (name 78xx_neu)(type KiCad)(uri "D:\\Eigene Dateien\\Dokumente\\Projekte\\KiCad\\Kicad_Lib\\Footprint\\78xx_neu.pretty")(options "")(descr ""))
+  (lib (name mysensors_radios)(type KiCad)(uri D:\KiCadLibs\libaries\mysensors_radios.pretty)(options "")(descr ""))
+  (lib (name 78xx_neu)(type KiCad)(uri D:\KiCadLibs\libaries\78xx_neu.pretty)(options "")(descr ""))
+  (lib (name TRXCOM)(type KiCad)(uri D:\KiCadLibs\libaries\TRXCOM.pretty)(options "")(descr ""))
+  (lib (name w_rf_modules)(type KiCad)(uri D:\KiCadLibs\libaries\w_rf_modules.pretty)(options "")(descr ""))
+  (lib (name w_smd_inductors)(type KiCad)(uri D:\KiCadLibs\libaries\w_smd_inductors.pretty)(options "")(descr ""))
+  (lib (name SW0773)(type KiCad)(uri D:\KiCadLibs\libaries\SW0773.pretty)(options "")(descr ""))
+  (lib (name w_conn_rf)(type KiCad)(uri D:\KiCadLibs\libaries\w_conn_rf.pretty)(options "")(descr ""))
+  (lib (name w_crystal)(type KiCad)(uri D:\KiCadLibs\libaries\w_crystal.pretty)(options "")(descr ""))
 )
