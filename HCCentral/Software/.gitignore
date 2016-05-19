@@ -13,6 +13,7 @@
 *.cbp
 *.layout
 *.dSYM
+*.exe
 
 # make generated files
 .config*
