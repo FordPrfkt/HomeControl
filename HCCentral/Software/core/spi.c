@@ -26,13 +26,7 @@
 #include "config.h"
 #include "hardware/radio/rfm12/rfm12.h"
 
-#if defined(ENC28J60_SUPPORT)       || \
-    defined(SER_RAM_23K256_SUPPORT) || \
-    defined(RFM12_SUPPORT)          || \
-    defined(DATAFLASH_SUPPORT)      || \
-    defined(USTREAM_SUPPORT)        || \
-    defined(SPI_CS_SD_READER_PIN)   || \
-    defined(S1D15G10_SUPPORT)
+#ifdef SPI
 
 void
 spi_init(void)
@@ -40,17 +34,6 @@ spi_init(void)
   /* Input and Output configuration is done in the beginning of main(), so it
    * doesn't have to be done here
    */
-
-  /* Set the chip-selects as high */
-
-#ifdef ENC28J60_SUPPORT
-  PIN_SET(SPI_CS_NET);
-#endif
-
-#ifdef SER_RAM_23K256_SUPPORT
-  PIN_SET(SPI_CS_23K256);
-#endif
-
 #ifdef RFM12_SUPPORT
   for (int8_t modul = 0; modul < RFM12_MODULE_COUNT; modul++)
   {
@@ -58,31 +41,15 @@ spi_init(void)
   }
 #endif
 
-#ifdef DATAFLASH_SUPPORT
-  PIN_SET(SPI_CS_DF);
-#endif
-
 #ifdef USTREAM_SUPPORT
   PIN_SET(VS1053_CS);
 #endif
 
-#if defined(SPI_CS_SD_READER_PIN)
-  PIN_SET(SPI_CS_SD_READER);
-#endif
-
-#ifdef S1D15G10_SUPPORT
-  PIN_SET(S1D15G10_CS);
-#endif
-
-#ifndef SOFT_SPI_SUPPORT
   /* enable spi, set master and clock modes (f/2) */
   _SPCR0 = _BV(_SPE0) | _BV(_MSTR0);
   _SPSR0 = _BV(_SPI2X0);
-#endif
 }
 
-
-#ifndef SOFT_SPI_SUPPORT
 static void
 spi_wait_busy(void)
 {
@@ -97,17 +64,15 @@ spi_wait_busy(void)
 #else
   while (!(_SPSR0 & _BV(_SPIF0)));
 #endif
-
 }
 
 uint8_t noinline
-spi_send(uint8_t data)
+spi_send(SPI_Interface_t interface, uint8_t data)
 {
   _SPDR0 = data;
   spi_wait_busy();
 
   return _SPDR0;
 }
-#endif /* !SOFT_SPI_SUPPORT */
 
-#endif /* ENC28J60_SUPPORT || SER_RAM_23K256_SUPPORT || RFM12_SUPPORT || DATAFLASH_SUPPORT || USTREAM_SUPPORT || SPI_CS_SD_READER_PIN || S1D15G10_SUPPORT*/
+#endif /* SPI */

@@ -129,6 +129,8 @@ int16_t sram23k256_init(void)
   bool fail = false;
 #endif
 
+  PIN_SET(SPI_CS_23K256);
+
   PIN_SET(SRAM_23K256_HOLD);
 
   SERRAMDEBUG ("init\n");

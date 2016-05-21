@@ -82,16 +82,21 @@ fi
 	bool "MBR support" MBR_SUPPORT
 
 	bool "Teensy build" TEENSY_SUPPORT
-
-	dep_bool "Use SPI Timeout" SPI_TIMEOUT $ARCH_AVR
-	dep_bool "Use Usart in SPI Mode" USART_SPI_SUPPORT $ARCH_AVR
-	if [ "$USART_SPI_SUPPORT" = y ]; then
-		choice '  SPI usart select' "$(usart_choice SPI)"
-		usart_process_choice SPI
-	else
-		dep_bool "Use Software-SPI" SOFT_SPI_SUPPORT $ARCH_AVR
-	fi
-
+    
+    define_bool SPI_SUPPORT y
+    
+    dep_bool_menu "Use SPI" SPI_SUPPORT $ARCH_AVR
+        comment "Enable SPI Support"
+        dep_bool "Use SPI Timeout" SPI_TIMEOUT $ARCH_AVR
+        dep_bool "Use Hardware SPI" HW_SPI_SUPPORT $ARCH_AVR
+        dep_bool "Use Usart in SPI Mode" USART_SPI_SUPPORT $ARCH_AVR
+        if [ "$USART_SPI_SUPPORT" = y ]; then
+            choice '  SPI usart select' "$(usart_choice SPI)"^
+            usart_process_choice SPI
+        fi
+        dep_bool "Use Software-SPI" SOFT_SPI_SUPPORT $ARCH_AVR
+    endmenu
+    
 	define_string GIT_VERSION "$(scripts/get-git-version)"
 
 	bool 'Debug: Discard some packets' DEBUG_DISCARD_SOME

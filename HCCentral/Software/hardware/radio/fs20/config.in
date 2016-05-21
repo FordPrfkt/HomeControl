@@ -1,4 +1,4 @@
-dep_bool_menu "FS20 RF-control" FS20_SUPPORT $ARCH_AVR
+dep_bool_menu "FS20 RF-control" FS20_SUPPORT $ARCH_AVR $SPI
   dep_bool "FS20 Send" FS20_SEND_SUPPORT $FS20_SUPPORT
   dep_bool "FHT Send" FHT_SEND_SUPPORT $FS20_SUPPORT  
   dep_bool "FS20/FHT Recieve" FS20_RECEIVE_SUPPORT $FS20_SUPPORT

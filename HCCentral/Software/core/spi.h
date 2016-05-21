@@ -25,10 +25,27 @@
 #include <stdint.h>
 #include "config.h"
 
+#ifdef SPI
 #define noinline __attribute__((noinline))
+
+typedef enum SPI_Interface_e
+{
+#ifdef HW_SPI_SUPPORT
+SPI_HW = 0,
+#endif
+
+#ifdef SOFT_SPI_SUPPORT
+SPI_SW = 1,
+#endif
+
+#ifdef USART_SPI_SUPPORT
+SPI_USART = 2
+#endif
+}SPI_Interface_t;
 
 /* prototypes */
 void spi_init(void);
-uint8_t noinline spi_send(uint8_t data);
+uint8_t noinline spi_send(SPI_Interface_t interface, uint8_t data);
+#endif /* SPI */
 
 #endif /* _SPI_H */

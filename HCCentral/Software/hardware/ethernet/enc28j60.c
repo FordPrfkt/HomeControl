@@ -274,6 +274,8 @@ void init_enc28j60(void)
     debug_guard=0xff;
 #endif
 
+    PIN_SET(SPI_CS_NET);
+
     reset_controller();
     
 #if CONF_ENC_ECOCON != ECOCON_UNSET

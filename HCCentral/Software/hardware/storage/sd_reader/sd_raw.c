@@ -182,6 +182,8 @@ uint8_t sd_raw_init(void)
     configure_pin_available();
     configure_pin_locked();
 
+    PIN_SET(SPI_CS_SD_READER);
+
     /* enable outputs for MOSI, SCK, SS, input for MISO */
 #if 0
     configure_pin_mosi();

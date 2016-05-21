@@ -107,6 +107,8 @@ static const uint8_t ylMin = 2;
 uint8_t lcd_init_flag = 0;
 
 void sendByte(uint8_t cmd, uint8_t data) {
+  PIN_SET(S1D15G10_CS);
+
   // enable chip_sel
   PIN_CLEAR(S1D15G10_CS);
 

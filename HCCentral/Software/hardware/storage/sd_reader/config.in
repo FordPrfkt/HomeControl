@@ -1,4 +1,4 @@
-dep_bool_menu "SD/MMC-Card Reader" SD_READER_SUPPORT $ARCH_AVR
+dep_bool_menu "SD/MMC-Card Reader" SD_READER_SUPPORT $ARCH_AVR $SPI
 
   if [ "$SD_READER_SUPPORT" = "y" ]; then
 

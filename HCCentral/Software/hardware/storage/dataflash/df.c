@@ -40,9 +40,7 @@
 
 void df_init(df_chip_t chip)
 {
-
-    /* no init needed atm */
-
+  PIN_SET(SPI_CS_DF);
 }
 
 void df_buf_load(df_chip_t chip, df_buf_t buffer, df_page_t page)
