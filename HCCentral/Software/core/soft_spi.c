@@ -20,10 +20,12 @@
  */
 
 #include "config.h"
+
 #include <avr/io.h>
+#include "spi_soft.h"
 
 uint8_t 
-spi_send(uint8_t outdata)
+spi_soft_send(uint8_t outdata)
 {
   DDR_CONFIG_IN(SOFT_SPI_MISO);
 
@@ -49,4 +51,3 @@ spi_send(uint8_t outdata)
   DDR_CONFIG_OUT(SOFT_SPI_MISO);
   return indata;
 }
-

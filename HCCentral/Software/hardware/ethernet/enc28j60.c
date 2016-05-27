@@ -75,15 +75,15 @@ uint8_t read_control_register(uint8_t address)
     cs_low();
 
     /* send opcode and address */
-    spi_send(CMD_RCR | (address & REGISTER_ADDRESS_MASK));
+    spi_send(SPI_HW,CMD_RCR | (address & REGISTER_ADDRESS_MASK));
 
     /* read data */
-    uint8_t data = spi_send(0);
+    uint8_t data = spi_send(SPI_HW,0);
 
     /* if this is a register in MAC or MII (when MSB is set),
      * only a dummy byte has been read so far, read real data now */
     if (address & _BV(7)) {
-        data = spi_send(0);
+        data = spi_send(SPI_HW,0);
     }
 
     /* release device */
@@ -100,10 +100,10 @@ uint8_t read_buffer_memory(void)
     cs_low();
 
     /* send opcode */
-    spi_send(CMD_RBM);
+    spi_send(SPI_HW,CMD_RBM);
 
     /* read data */
-    uint8_t data = spi_send(0);
+    uint8_t data = spi_send(SPI_HW,0);
 
     /* release device */
     cs_high();
@@ -124,10 +124,10 @@ void write_control_register(uint8_t address, uint8_t data)
     cs_low();
 
     /* send opcode */
-    spi_send(CMD_WCR | (address & REGISTER_ADDRESS_MASK) );
+    spi_send(SPI_HW,CMD_WCR | (address & REGISTER_ADDRESS_MASK) );
 
     /* send data */
-    spi_send(data);
+    spi_send(SPI_HW,data);
 
     /* release device */
     cs_high();
@@ -141,10 +141,10 @@ void write_buffer_memory(uint8_t data)
     cs_low();
 
     /* send opcode */
-    spi_send(CMD_WBM);
+    spi_send(SPI_HW,CMD_WBM);
 
     /* send data */
-    spi_send(data);
+    spi_send(SPI_HW,data);
 
     /* release device */
     cs_high();
@@ -163,10 +163,10 @@ void bit_field_modify(uint8_t address, uint8_t mask, uint8_t opcode)
     cs_low();
 
     /* send opcode */
-    spi_send(opcode | (address & REGISTER_ADDRESS_MASK) );
+    spi_send(SPI_HW,opcode | (address & REGISTER_ADDRESS_MASK) );
 
     /* send data */
-    spi_send(mask);
+    spi_send(SPI_HW,mask);
 
     /* release device */
     cs_high();
@@ -241,7 +241,7 @@ void reset_controller(void)
     cs_low();
 
     /* send opcode */
-    spi_send(CMD_RESET);
+    spi_send(SPI_HW,CMD_RESET);
 
     /* wait until the controller is ready */
 #ifdef ENC28J60_REV5_WORKAROUND

@@ -16,9 +16,11 @@ $(ARCH_AVR)_ECMD_SRC += core/periodic_ecmd.c
 SRC += core/eeprom.c 
 $(MBR_SUPPORT)_SRC += core/mbr.c
 
-ifneq ($(USART_SPI_SUPPORT),y)
+ifeq ($(SPI_SUPPORT),y)
 $(ARCH_AVR)_SRC += core/spi.c
-else
+endif
+
+ifeq ($(USART_SPI_SUPPORT),y)
 $(ARCH_AVR)_SRC += core/spi_usart.c
 endif
 

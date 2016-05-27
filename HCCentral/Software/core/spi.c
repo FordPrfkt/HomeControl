@@ -19,14 +19,14 @@
  * http://www.gnu.org/copyleft/gpl.html
  */
 
-#include <avr/io.h>
-#include "core/spi.h"
-#include "spi.h"
-#include "debug.h"
 #include "config.h"
-#include "hardware/radio/rfm12/rfm12.h"
 
-#ifdef SPI
+#include <avr/io.h>
+#include "spi.h"
+#include "core/spi.h"
+#include "spi_usart.h"
+#include "spi_soft.h"
+#include "debug.h"
 
 void
 spi_init(void)
@@ -45,11 +45,18 @@ spi_init(void)
   PIN_SET(VS1053_CS);
 #endif
 
+#ifdef USART_SPI_SUPPORT
+  spi_usart_init();
+#endif /* USART_SPI_SUPPORT */
+
+#ifdef HW_SPI_SUPPORT
   /* enable spi, set master and clock modes (f/2) */
   _SPCR0 = _BV(_SPE0) | _BV(_MSTR0);
   _SPSR0 = _BV(_SPI2X0);
+#endif /*HW_SPI_SUPPORT*/
 }
 
+#ifdef HW_SPI_SUPPORT
 static void
 spi_wait_busy(void)
 {
@@ -65,14 +72,39 @@ spi_wait_busy(void)
   while (!(_SPSR0 & _BV(_SPIF0)));
 #endif
 }
+#endif /*HW_SPI_SUPPORT*/
 
 uint8_t noinline
 spi_send(SPI_Interface_t interface, uint8_t data)
 {
-  _SPDR0 = data;
-  spi_wait_busy();
+	uint8_t result;
 
-  return _SPDR0;
+	switch(interface)
+	{
+#ifdef HW_SPI_SUPPORT
+	case SPI_HW:
+		  _SPDR0 = data;
+		  spi_wait_busy();
+		  result = _SPDR0;
+		break;
+#endif /* HW_SPI_SUPPORT */
+
+#ifdef SOFT_SPI_SUPPORT
+	case SPI_SW:
+		result = spi_soft_send(data);
+		break;
+#endif /* SOFT_SPI_SUPPORT */
+
+#ifdef USART_SPI_SUPPORT
+	case SPI_USART:
+		result = spi_usart_send(data);
+		break;
+#endif /* USART_SPI_SUPPORT */
+
+	default:
+		result = 0;
+		break;
+	}
+
+  return result;
 }
-
-#endif /* SPI */

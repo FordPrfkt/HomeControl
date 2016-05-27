@@ -82,11 +82,8 @@ fi
 	bool "MBR support" MBR_SUPPORT
 
 	bool "Teensy build" TEENSY_SUPPORT
-    
-    define_bool SPI_SUPPORT y
-    
+      
     dep_bool_menu "Use SPI" SPI_SUPPORT $ARCH_AVR
-        comment "Enable SPI Support"
         dep_bool "Use SPI Timeout" SPI_TIMEOUT $ARCH_AVR
         dep_bool "Use Hardware SPI" HW_SPI_SUPPORT $ARCH_AVR
         dep_bool "Use Usart in SPI Mode" USART_SPI_SUPPORT $ARCH_AVR

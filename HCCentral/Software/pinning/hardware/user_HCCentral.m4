@@ -14,6 +14,10 @@ pin(BTN_MODE, PA3, INPUT)
 _x(BTN_MODE)\
 ')
 
+pin(SOFT_SPI_MOSI, PB4, OUTPUT)
+pin(SOFT_SPI_MISO, PB5, OUTPUT)
+pin(SOFT_SPI_SCK, PB6, OUTPUT)
+
 /* port the enc28j60 is attached to */
 pin(SPI_CS_NET, PB0, OUTPUT)
 

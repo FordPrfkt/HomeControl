@@ -20,6 +20,7 @@
  */
 
 #include "config.h"
+#include "autoconf.h"
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -40,8 +41,6 @@
 #include "protocols/uip/ipv6.h"
 #include "hardware/storage/sd_reader/sd_raw.h"
 #include "core/vfs/vfs.h"
-
-#include "autoconf.h"
 
 #include "version.h"
 
@@ -180,8 +179,7 @@ main (void)
   wdt_disable();
 #endif //USE_WATCHDOG
 
-#if defined(RFM12_SUPPORT) || defined(ENC28J60_SUPPORT) \
-	|| defined(DATAFLASH_SUPPORT)
+#ifdef SPI_SUPPORT
   spi_init();
 #endif
 

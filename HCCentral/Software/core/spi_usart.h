@@ -19,35 +19,18 @@
  * http://www.gnu.org/copyleft/gpl.html
  */
 
-#ifndef _SPI_H
-#define _SPI_H
+#ifndef _SPI_USART_H
+#define _SPI_USART_H
 
 #include <stdint.h>
 #include "config.h"
 
+#ifdef USART_SPI_SUPPORT
 #define noinline __attribute__((noinline))
 
-#ifdef SPI_SUPPORT
-
-typedef enum SPI_Interface_e
-{
-#ifdef HW_SPI_SUPPORT
-SPI_HW = 0,
-#endif
-
-#ifdef SOFT_SPI_SUPPORT
-SPI_SW = 1,
-#endif
-
-#ifdef USART_SPI_SUPPORT
-SPI_USART = 2
-#endif
-}SPI_Interface_t;
-
 /* prototypes */
-void spi_init(void);
-uint8_t noinline spi_send(SPI_Interface_t interface, uint8_t data);
+void spi_usart_init(void);
+uint8_t noinline spi_usart_send(uint8_t data);
+#endif /* USART_SPI_SUPPORT */
 
-#endif /* SPI_SUPPORT */
-
-#endif /* _SPI_H */
+#endif /* _SPI_USART_H */

@@ -19,56 +19,34 @@
  * http://www.gnu.org/copyleft/gpl.html
  */
 
+#include "config.h"
+
 #include <avr/io.h>
-#include "core/spi.h"
 #include "spi.h"
 #include "debug.h"
-#include "config.h"
+#include "spi_usart.h"
 
 #define USE_USART SPI_USE_USART
 #define BAUD 9600 /* Dummy */
 #include "core/usart.h"
 
-#if defined(RFM12_SUPPORT) || defined(ENC28J60_SUPPORT) \
-  || defined(DATAFLASH_SUPPORT) || defined(SD_READER_SUPPORT)
-
 static void spi_wait_busy(void);
 
-void spi_init(void)
+void spi_usart_init(void)
 {
-
-    usart(UBRR) = 0;
-
-  /* Set the chipselects as high */
-  /* We need the DDR configuration here, because this enables master mode of
-   * usart_spi
-   */
-
-#ifdef ENC28J60_SUPPORT
-    DDR_CONFIG_OUT(SPI_CS_NET);
-    PIN_SET(SPI_CS_NET);
-#endif
-
-#ifdef RFM12_SUPPORT
-    DDR_CONFIG_OUT(SPI_CS_RFM12);
-    PIN_SET(SPI_CS_RFM12);
-#endif
-
-#ifdef DATAFLASH_SUPPORT
-    DDR_CONFIG_OUT(SPI_CS_DF);
-    PIN_SET(SPI_CS_DF);
-#endif
+    usart(UBRR, L) = 0;
+    usart(UBRR, H) = 0;
 
     /* Set MSPI mode of operation and SPI data mode 0. */
-    usart(UCSR,C) = _BV(usart(UMSEL,1)) | _BV(usart(UMSEL,0)) 
-        | _BV(usart(UCPHA))  | _BV(usart(UCPOL));
+    usart(UCSR,C) = _BV(usart(UMSEL,1)) | _BV(usart(UMSEL,0)) | _BV(usart(UCSZ0)) | _BV(usart(UCPOL));
     /* Enable receiver and transmitter. */
     usart(UCSR,B) = _BV(usart(RXEN)) | _BV(usart(TXEN));
     /* Set baud rate. */
     /* IMPORTANT: The Baud Rate must be set after the transmitter is enabled
      * */
     /* Set to the higest available Baudrate: fosc/2 */
-    usart(UBRR) = 0;
+    usart(UBRR, L) = 0;
+    usart(UBRR, H) = 0;
 }
 
 static void spi_wait_busy(void)
@@ -88,7 +66,7 @@ static void spi_wait_busy(void)
 
 }
 
-uint8_t noinline spi_send(uint8_t data)
+uint8_t noinline spi_usart_send(uint8_t data)
 {
     usart(UDR) = data;
     spi_wait_busy();
@@ -96,6 +74,3 @@ uint8_t noinline spi_send(uint8_t data)
     return usart(UDR);
 
 }
-
-#endif /* DATAFLASH_SUPPORT || ENC28J60_SUPPORT || RFM12_SUPPORT 
-    || SD_READER_SUPPORT */
