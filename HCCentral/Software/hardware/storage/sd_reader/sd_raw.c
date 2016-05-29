@@ -164,8 +164,8 @@ static void sd_raw_send_byte(uint8_t b);
 static uint8_t sd_raw_rec_byte(void);
 #else
 #include "core/spi.h"
-#define sd_raw_send_byte(b) spi_send(b)
-#define sd_raw_rec_byte() spi_send(0xff)
+#define sd_raw_send_byte(b) spi_send(SPI_HW, b)
+#define sd_raw_rec_byte() spi_send(SPI_HW, 0xff)
 #endif
 static uint8_t sd_raw_send_command(uint8_t command, uint32_t arg);
 

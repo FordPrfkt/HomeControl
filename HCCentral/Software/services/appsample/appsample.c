@@ -27,7 +27,7 @@
 
 #include "config.h"
 #include "appsample.h"
-
+#include "core/spi.h"
 #include "protocols/ecmd/ecmd-base.h"
 
 /*
@@ -52,6 +52,8 @@ app_sample_periodic(void)
   APPSAMPLEDEBUG ("periodic\n");
   // enter your code here
 
+  /*spi_send(SPI_USART, 0x42);*/
+  PIN_TOGGLE(STATUSLED_BOOTED);
   return ECMD_FINAL_OK;
 }
 
@@ -72,5 +74,5 @@ app_sample_onrequest(char *cmd, char *output, uint16_t len){
   -- Ethersex META --
   header(services/appsample/appsample.h)
   ifdef(`conf_APP_SAMPLE_INIT_AUTOSTART',`init(app_sample_init)')
-  ifdef(`conf_APP_SAMPLE_PERIODIC_AUTOSTART',`timer(100,app_sample_periodic())')
+  ifdef(`conf_APP_SAMPLE_PERIODIC_AUTOSTART',`timer(5,app_sample_periodic())')
 */

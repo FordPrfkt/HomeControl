@@ -27,13 +27,22 @@
 #include "spi_usart.h"
 #include "spi_soft.h"
 #include "debug.h"
-
+#include "hardware/radio/rfm12/rfm12.h"
 void
 spi_init(void)
 {
   /* Input and Output configuration is done in the beginning of main(), so it
    * doesn't have to be done here
    */
+
+  /* Set the chip-selects as high */
+
+#ifdef ENC28J60_SUPPORT
+  PIN_SET(SPI_CS_NET);
+#endif
+
+  PIN_SET(SPI_CS_SD_READER);
+
 #ifdef RFM12_SUPPORT
   for (int8_t modul = 0; modul < RFM12_MODULE_COUNT; modul++)
   {

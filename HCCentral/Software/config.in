@@ -88,7 +88,7 @@ fi
         dep_bool "Use Hardware SPI" HW_SPI_SUPPORT $ARCH_AVR
         dep_bool "Use Usart in SPI Mode" USART_SPI_SUPPORT $ARCH_AVR
         if [ "$USART_SPI_SUPPORT" = y ]; then
-            choice '  SPI usart select' "$(usart_choice SPI)"^
+            choice '  SPI usart select' "$(usart_choice SPI)"
             usart_process_choice SPI
         fi
         dep_bool "Use Software-SPI" SOFT_SPI_SUPPORT $ARCH_AVR
