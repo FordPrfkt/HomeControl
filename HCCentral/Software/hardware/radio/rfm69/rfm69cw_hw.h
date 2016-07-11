@@ -108,6 +108,8 @@
 #define	RFM69_REGTESTDAGC		(0x6F)	/* Fading Margin Improvement */
 #define	RFM69_REGTESTAFC		(0x71)	/* AFC offset for low modulation index AFC */
 
+#define RFM69_AESKEYLEN (16)
+
 #define RFM69CW_OPMODE_MODE (2)
 #define RFM69CW_OPMODE_LISTENON (6)
 

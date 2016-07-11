@@ -30,5 +30,4 @@
 /*
   -- Ethersex META --
   block(RFM69 Radio)
-  ecmd_feature(push, "push ", NUMBER,Push button identified by NUMBER)
 */

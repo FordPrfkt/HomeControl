@@ -24,6 +24,7 @@
 #define HARDWARE_RADIO_RFM69_RFM69_H_
 
 #include "config.h"
+#include "rfm69cw_hw.h"
 
 #ifdef RFM69_SUPPORT
 
@@ -35,6 +36,8 @@ typedef enum RFM69_ModuleID_e
 
 void RFM69_init(void);
 void RFM69_setMode(RFM69_ModuleID_t module, RFM69_BasicMode_t mode);
+uint8_t RFM69_getTemperature(RFM69_ModuleID_t module);
+void RFM69_calibrateOSC(RFM69_ModuleID_t module);
 
 void rfm69_setModulation(uint8_t module, uint8_t mode);
 void rfm69_setPower(uint8_t module, uint8_t power);
@@ -50,6 +53,13 @@ uint8_t rfm69_getRSSI(uint8_t module);
 
 void rfm69_transmit(uint8_t module, uint8_t data);
 void rfm69_receive(uint8_t module, uint8_t *data);
+
+#ifdef DEBUG_RFM69
+#include "core/debug.h"
+#define RFM69_DEBUG(a...)  debug_printf("RFM69: " a)
+#else
+#define RFM69_DEBUG(a...)
+#endif
 
 #endif /* RFM69_SUPPORT */
 #endif /* HARDWARE_RADIO_RFM69_RFM69_H_ */

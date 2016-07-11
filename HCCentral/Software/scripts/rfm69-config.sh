@@ -1,6 +1,6 @@
 
 get_rfm69_count() {
-  RFM69S=2
+  RFM69S=3
 }
 
 rfm69_choice() {
@@ -29,10 +29,10 @@ rfm69_count_used() {
   if [ "$RFM69_IP_SUPPORT" = "y" ]; then
     RFM69S_USED=$(($RFM69S_USED + 1))
   fi
-  if [ "$RFM69_ASK_433_SUPPORT" = "y" ]; then
+  if [ "$RFM69_433_SUPPORT" = "y" ]; then
     RFM69S_USED=$(($RFM69S_USED + 1))
   fi
-  if [ "$RFM69_ASK_868_SUPPORT" = "y" ]; then
+  if [ "$RFM69_866_SUPPORT" = "y" ]; then
       RFM69S_USED=$(($RFM69S_USED + 1))
   fi
 }

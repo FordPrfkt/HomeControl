@@ -12,29 +12,30 @@ dep_bool_menu "RFM69" RFM69_SUPPORT $ARCH_AVR $SPI
        rfm69_process_choice RFM69_433
       fi
       
-      dep_bool "Use Reset" RFM69_433_USE_RESET $RFM69_433_SUPPORT $RFM69_SUPPORT
-      dep_bool "Use activity LED" RFM69_433_USE_LED $RFM69_433_SUPPORT $RFM69_SUPPORT
+      dep_bool "Use Reset" RFM69_433_USE_RESET $RFM69_433_SUPPORT
+      dep_bool "Use activity LED" RFM69_433_USE_LED $RFM69_433_SUPPORT
     else
       comment "433MHz not available. No Free RFM69. ($RFM69S_USED/$RFM69S)"
     fi
 
     comment ""
-    dep_bool "868MHz" RFM69_868_SUPPORT $RFM69_SUPPORT
-    if [ "$RFM69_868_SUPPORT" = "y" -o $RFM69S -gt $RFM69S_USED ]; then
+    
+    dep_bool "866MHz" RFM69_866_SUPPORT $RFM69_SUPPORT
+    if [ "$RFM69_866_SUPPORT" = "y" -o $RFM69S -gt $RFM69S_USED ]; then
 
-      if [ "$RFM69_868_SUPPORT" = "y" ]; then
-        choice "  RFM69 select" "$(rfm69_choice RFM69_868)"
-        rfm12_process_choice RFM69_868
+      if [ "$RFM69_866_SUPPORT" = "y" ]; then
+        choice "  RFM69 select" "$(rfm69_choice RFM69_866)"
+        rfm12_process_choice RFM69_866
       fi
 
+      dep_bool "Use Reset" RFM69_866_USE_RESET $RFM69_866_SUPPORT
+      dep_bool "Use activity LED" RFM69_866_USE_LED $RFM69_866_SUPPORT
     else
-      comment "868MHz not available. No Free RFM69. ($RFM69S_USED/$RFM69S)"
+      comment "866MHz not available. No Free RFM69. ($RFM69S_USED/$RFM69S)"
     fi
 
-      dep_bool "Use Reset" RFM69_866_USE_RESET $RFM69_866_SUPPORT $RFM69_SUPPORT
-      dep_bool "Use activity LED" RFM69_866_USE_LED $RFM69_866_SUPPORT $RFM69_SUPPORT
-
     comment  "Debugging Flags"
+    dep_bool "RFM69 Debug" DEBUG_RFM69 $DEBUG $RFM69_SUPPORT
   else
     comment "RFM69 ASK Support not available. No Free RFM69. ($RFM69S_USED/$RFM69S)"
   fi

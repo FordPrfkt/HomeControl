@@ -40,14 +40,14 @@ void spi_usart_init(void)
     DDR_CONFIG_OUT(USART_XCK);
 
     /* Set MSPI mode of operation and SPI data mode 0. */
-    usart(UCSR,C) = _BV(usart(UMSEL,1)) | _BV(usart(UMSEL,0)) | _BV(usart(UCSZ0)) | _BV(usart(UCPOL));
+    usart(UCSR,C) = _BV(usart(UMSEL,1)) | _BV(usart(UMSEL,0)) /*| _BV(usart(UCSZ0)) | _BV(usart(UCPOL))*/;
     /* Enable receiver and transmitter. */
     usart(UCSR,B) = _BV(usart(RXEN)) | _BV(usart(TXEN));
     /* Set baud rate. */
     /* IMPORTANT: The Baud Rate must be set after the transmitter is enabled
      * */
     /* Set to the higest available Baudrate: fosc/2 */
-    usart(UBRR, L) = 1;
+    usart(UBRR, L) = 0x1F;
     usart(UBRR, H) = 0;
 }
 
