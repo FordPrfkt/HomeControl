@@ -22,6 +22,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <stdbool.h>
 #include <util/delay.h>
 #include "config.h"
@@ -39,7 +40,7 @@
 #define RFM69_NUM_MODULES 1
 #define _BV(x) (1 << x)
 
-const uint16_t rfm69Bitrate_Values[RFM69_NUM_BITRATES] = {
+static const uint16_t rfm69Bitrate_Values[RFM69_NUM_BITRATES] = {
 		0x682B, /* RFM69_BR_1k2 */
 		0x3415, /* RFM69_BR_2k4 */
 		0x0D05, /* RFM69_BR_9k6 */
@@ -51,16 +52,20 @@ const uint16_t rfm69Bitrate_Values[RFM69_NUM_BITRATES] = {
 		0x006B /* RFM69_BR_300 */
 };
 
-uint8_t rfm69_regRead(RFM69_ModuleID_t module, uint8_t reg);
-void rfm69_regWrite(RFM69_ModuleID_t module, uint8_t reg, uint8_t data);
-void rfm69_reset(RFM69_ModuleID_t module);
-void rfm69_getInterruptFlags(RFM69_ModuleID_t module, uint16_t *irqFlags);
-void rfm69_blinkLED(RFM69_ModuleID_t module);
+static uint8_t rfm69_blinkCtr = 0;
+
+static void rfm69_select(RFM69_ModuleID_t module);
+static void rfm69_deselect(RFM69_ModuleID_t module);
+static uint8_t rfm69_regRead(RFM69_ModuleID_t module, uint8_t reg);
+static void rfm69_regWrite(RFM69_ModuleID_t module, uint8_t reg, uint8_t data);
+static void rfm69_reset(RFM69_ModuleID_t module);
+static void rfm69_getInterruptFlags(RFM69_ModuleID_t module, uint16_t *irqFlags);
+static void rfm69_blinkLED(RFM69_ModuleID_t module);
 
 void RFM69_init(void)
 {
 	uint8_t ctr;
-
+	uint8_t temp;
 	RFM69_DEBUG("Initialize.\n");
 
 	PIN_SET(SPI_CS_RFM69_0);
@@ -69,22 +74,50 @@ void RFM69_init(void)
 	for (ctr = 0; ctr < RFM69_NUM_MODULES; ctr++)
 	{
 		rfm69_reset(ctr);
+
+		/* Set DIO Pin Modes:
+		 * DIO5: ModeReady
+		 * DIO2: Fifo not empty
+		 * DIO1: FiFo Full
+		 * DIO0: CrcOK/PacketSent*/
+		temp = (DIO_MAPPING_0 << RFM69CW_DIOMAPPING_DIO0)|
+			   (DIO_MAPPING_1 << RFM69CW_DIOMAPPING_DIO1)|
+			   (DIO_MAPPING_0 << RFM69CW_DIOMAPPING_DIO2);
+		rfm69_regWrite(ctr, RFM69_REGDIOMAPPING1, temp);
+		temp = (DIO_MAPPING_3 << RFM69CW_DIOMAPPING_DIO5) |
+			   (RFM69_CLKOUT_OFF << RFM69CW_DIOMAPPING_CLKOUT);
+		rfm69_regWrite(ctr, RFM69_REGDIOMAPPING2, temp);
+
+		/* Calibrate oscillator */
 		RFM69_setMode(ctr, RFM69_STANDBY_MODE);
 		RFM69_calibrateOSC(ctr);
 
+		/* Preamble: 4 Byte */
+		rfm69_regWrite(ctr, RFM69_REGPREAMBLEMSB, 0);
+		rfm69_regWrite(ctr, RFM69_REGPREAMBLELSB, 4);
+
+		/* Select Data Whitening as DC-Free Mechanism */
+		temp = rfm69_regRead(ctr, RFM69_REGPACKETCONFIG1);
+		temp &= (uint8_t)~(RFM69CW_PACKETCONF_DCFREE_MASK << RFM69CW_PACKETCONF_DCFREE);
+		temp |=  (RFM69_DCFREE_WHITENING << RFM69CW_PACKETCONF_DCFREE);
+		rfm69_regWrite(ctr, RFM69_REGPREAMBLELSB, temp);
+
+		/* Enable Modulation Shaping*/
+		temp = rfm69_regRead(ctr, RFM69_REGDATAMODUL);
+		temp &= (uint8_t)~(RFM69CW_DATAMODUL_MODSHAPING_MASK << RFM69CW_DATAMODUL_MODSHAPING);
+		temp |=  (1 << RFM69CW_DATAMODUL_MODSHAPING);
+		rfm69_regWrite(ctr, RFM69_REGDATAMODUL, temp);
+
+		/* AFC Auto on */
+		temp = _BV(RFM69CW_AFCFEI_AFCAUTOON)|_BV(RFM69CW_AFCFEI_AFCAUTOCLEAR);
+		rfm69_regWrite(ctr, RFM69_REGAFCFEI, temp);
+
 		/* Fest einstellen:
-		 * PaLevel
-		 * OuPower
-		 * OcpTrim
-		 * DioMapping
-		 * PreambleSize
-		 * DataWhitening
-		 * ModulationShaping
-		 * FrequencyDeviation
 		 * CarrierFreqency
-		 * AfcAutoOn
 		 *  */
 	}
+
+	/* TODO: Sleep Mode */
 
 	RFM69_DEBUG("Init Done\n");
 }
@@ -109,6 +142,8 @@ void RFM69_setMode(RFM69_ModuleID_t module, RFM69_BasicMode_t mode)
 
 	rfm69_regWrite(module, RFM69_REGOPMODE, regOpMode);
 
+	/* TODO: Wait for mode ready */
+
 	RFM69_DEBUG("Mode set to %i\n", mode);
 }
 
@@ -118,7 +153,7 @@ void RFM69_setAutoMode(RFM69_ModuleID_t module, RFM69_IntermediateMode_t mode,
 
 }
 
-void RFM69_setBitrate(uint8_t module, RFM69_BitRate_e mode)
+void RFM69_setBitrate(uint8_t module, RFM69_BitRate_t mode)
 {
 	/* RxBW anpassen! */
 	/* Afc ein/ausschalten, ggf LO offset anpassen */
@@ -136,7 +171,7 @@ void RFM69_setSyncWord(uint8_t module, uint8_t syncWord[], uint8_t length)
 	regSyncCfg &= ~(7 << 3);
 	regSyncCfg |= (length << 3);
 
-	PIN_CLEAR(SPI_CS_RFM69_0);
+	rfm69_select(module);
 
 	SPI_SEND(RFM69_REGSYNCCONFIG);
 	SPI_SEND(regSyncCfg);
@@ -146,7 +181,7 @@ void RFM69_setSyncWord(uint8_t module, uint8_t syncWord[], uint8_t length)
 		SPI_SEND(syncWord[ctr]);
 	}
 
-	PIN_SET(SPI_CS_RFM69_0);
+	rfm69_deselect(module);
 }
 
 void RFM69_setSyncMode(uint8_t module, bool syncOn)
@@ -182,7 +217,7 @@ void RFM69_setAESKey(uint8_t module, uint8_t aesKey[])
 {
 	uint8_t ctr;
 
-	PIN_CLEAR(SPI_CS_RFM69_0);
+	rfm69_select(module);
 
 	SPI_SEND(RFM69_REGAESKEY1);
 	for (ctr = 0; ctr < RFM69_AESKEYLEN; ctr++)
@@ -190,7 +225,7 @@ void RFM69_setAESKey(uint8_t module, uint8_t aesKey[])
 		SPI_SEND(aesKey[ctr]);
 	}
 
-	PIN_SET(SPI_CS_RFM69_0);
+	rfm69_deselect(module);
 }
 
 void RFM69_configureAES(uint8_t module, bool aesEnable)
@@ -206,6 +241,36 @@ void RFM69_setPacketFormat(uint8_t module, uint8_t format, uint8_t payLoadLen)
 
 	rfm69_regWrite(module, RFM69_REGPACKETCONFIG1, regPacketConf);
 	rfm69_regWrite(module, RFM69_REGPAYLOADLENGTH, payLoadLen);
+}
+
+void RFM69_setModulation(uint8_t module, RFM69_ModulationType_e modulation)
+{
+	uint8_t regDataModul;
+
+	regDataModul = rfm69_regRead(module, RFM69_REGDATAMODUL);
+	regDataModul = (regDataModul & 0xF3) |  ((modulation << RFM69CW_DATAMODUL_MODULATIONTYPE) & 0x0C);
+	rfm69_regWrite(module, RFM69_REGDATAMODUL, regDataModul);
+}
+
+uint8_t RFM69_getRSSI(uint8_t module, bool forceCalc)
+{
+	uint8_t rssiConf;
+
+	if (true == forceCalc)
+	{
+		rssiConf = 1;
+
+		rfm69_regWrite(module, RFM69_REGRSSICONFIG, rssiConf);
+
+		do
+		{
+			rssiConf = rfm69_regRead(module, RFM69_REGRSSICONFIG);
+		}while (rssiConf != 1);
+	}
+
+	rssiConf = rfm69_regRead(module, RFM69_REGRSSIVALUE);
+
+	return rssiConf / 2;
 }
 
 void RFM69_transmit(uint8_t module, uint8_t data[], uint8_t dataLen)
@@ -258,56 +323,123 @@ uint8_t RFM69_getTemperature(RFM69_ModuleID_t module)
 	return result;
 }
 
+uint8_t RFM69_getVersion(uint8_t module)
+{
+	return rfm69_regRead(module, RFM69_REGVERSION);
+}
+
+void rfm69_select(RFM69_ModuleID_t module)
+{
+	if (RFM69_MOD_433 == module)
+	{
+		PIN_CLEAR(SPI_CS_RFM69_0);
+	}
+	else if (RFM69_MOD_866 == module)
+	{
+		PIN_CLEAR(SPI_CS_RFM69_1);
+	}
+	else
+	{
+
+	}
+}
+
+void rfm69_deselect(RFM69_ModuleID_t module)
+{
+	if (RFM69_MOD_433 == module)
+	{
+		PIN_SET(SPI_CS_RFM69_0);
+	}
+	else if (RFM69_MOD_866 == module)
+	{
+		PIN_SET(SPI_CS_RFM69_1);
+	}
+	else
+	{
+
+	}
+}
+
 uint8_t rfm69_regRead(RFM69_ModuleID_t module, uint8_t reg)
 {
 	uint8_t result;
 
-	PIN_CLEAR(SPI_CS_RFM69_0);
+	rfm69_select(module);
 	reg &= 0x7F;
 	SPI_SEND(reg);
 	result = SPI_RECV();
-	PIN_SET(SPI_CS_RFM69_0);
+	rfm69_deselect(module);
+
+	rfm69_blinkLED(module);
 
 	return result;
 }
 
 void rfm69_regWrite(RFM69_ModuleID_t module, uint8_t reg, uint8_t data)
 {
-	PIN_CLEAR(SPI_CS_RFM69_0);
+	rfm69_select(module);
 	reg |= 0x80;
 	SPI_SEND(reg);
 	SPI_SEND(data);
-	PIN_SET(SPI_CS_RFM69_0);
+	rfm69_deselect(module);
+
+	rfm69_blinkLED(module);
 }
 
 void rfm69_getInterruptFlags(RFM69_ModuleID_t module, uint16_t *irqFlags)
 {
-	PIN_CLEAR(SPI_CS_RFM69_0);
+	rfm69_select(module);
 	SPI_SEND(RFM69_REGIRQFLAGS1);
 	*irqFlags = SPI_RECV();
 	*irqFlags |= SPI_RECV() << 8;
-	PIN_SET(SPI_CS_RFM69_0);
+	rfm69_deselect(module);
+	rfm69_blinkLED(module);
 }
 
 void rfm69_reset(RFM69_ModuleID_t module)
 {
-	PIN_SET(SPI_CS_RFM69_0);
-	PIN_SET(SPI_CS_RFM69_1);
+	rfm69_deselect(module);
 
 	PIN_SET(RESET_RFM69);
 	_delay_us(100);
 	PIN_CLEAR(RESET_RFM69);
 	_delay_ms(5);
+	rfm69_blinkLED(module);
 }
 
 void rfm69_blinkLED(RFM69_ModuleID_t module)
 {
+	if (RFM69_MOD_433 == module)
+	{
+		PIN_CLEAR(STATUSLED_RFM69_0);
+	}
+	else if (RFM69_MOD_866 == module)
+	{
+		PIN_CLEAR(STATUSLED_RFM69_1);
+	}
+	else
+	{
 
+	}
+
+	rfm69_blinkCtr = 0;
+}
+
+void RFM69_periodic(void)
+{
+	rfm69_blinkCtr++;
+	if (rfm69_blinkCtr >= 5)
+	{
+		PIN_SET(STATUSLED_RFM69_0);
+		PIN_SET(STATUSLED_RFM69_1);
+		rfm69_blinkCtr = 0;
+	}
 }
 
 /*
  * -- Ethersex META --
  * header(hardware/radio/rfm69/rfm69.h)
+ * timer(1, RFM69_periodic())
  * init(RFM69_init)
  */
 

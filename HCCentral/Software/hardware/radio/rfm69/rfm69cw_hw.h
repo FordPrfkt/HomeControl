@@ -27,6 +27,7 @@
 
 #ifdef RFM69_SUPPORT
 
+/* Register numbers */
 #define	RFM69_REGFIFO			(0x00)	/* FIFO read/write access */
 #define	RFM69_REGOPMODE 		(0x01)	/* Operating modes of the transceiver */
 #define	RFM69_REGDATAMODUL		(0x02)	/* Data operation mode and Modulation settings */
@@ -108,18 +109,57 @@
 #define	RFM69_REGTESTDAGC		(0x6F)	/* Fading Margin Improvement */
 #define	RFM69_REGTESTAFC		(0x71)	/* AFC offset for low modulation index AFC */
 
+/* Diverse Settings */
+#define RFM69_FXOSC (32u)
+#define RFM69_FSTEP (61u)
 #define RFM69_AESKEYLEN (16)
 
+/* Bit positions */
 #define RFM69CW_OPMODE_MODE (2)
 #define RFM69CW_OPMODE_LISTENON (6)
 
 #define RFM69CW_DATAMODUL_MODULATIONTYPE (3)
+#define RFM69CW_DATAMODUL_MODSHAPING (0)
+#define RFM69CW_DATAMODUL_MODSHAPING_MASK (3)
 
 #define RFM69CW_OSC1_RCCALSTART (7)
 #define RFM69CW_OSC1_RCCALDONE (6)
 
 #define RFM69CW_TEMP1_TEMPMEASSTART (3)
 #define RFM69CW_TEMP1_TEMPMEASRUN (2)
+
+#define RFM69CW_DIOMAPPING_DIO0 (6)
+#define RFM69CW_DIOMAPPING_DIO1 (4)
+#define RFM69CW_DIOMAPPING_DIO2 (2)
+#define RFM69CW_DIOMAPPING_DIO3 (0)
+#define RFM69CW_DIOMAPPING_DIO5 (4)
+#define RFM69CW_DIOMAPPING_CLKOUT (0)
+#define RFM69CW_DIOMAPPING_MASK (3)
+
+#define RFM69CW_PACKETCONF_DCFREE (5)
+#define RFM69CW_PACKETCONF_DCFREE_MASK (3)
+
+#define RFM69CW_AFCFEI_FEIDONE (6)
+#define RFM69CW_AFCFEI_FEISTART (5)
+#define RFM69CW_AFCFEI_AFCDONE (4)
+#define RFM69CW_AFCFEI_AFCAUTOCLEAR (3)
+#define RFM69CW_AFCFEI_AFCAUTOON (2)
+#define RFM69CW_AFCFEI_AFCCLEAR (1)
+#define RFM69CW_AFCFEI_AFCSTART (0)
+
+
+/* Setting values */
+typedef enum RFM69_ClkOut_e
+{
+	RFM69_CLKOUT_DIV0 = 0,
+	RFM69_CLKOUT_DIV2,
+	RFM69_CLKOUT_DIV4,
+	RFM69_CLKOUT_DIV8,
+	RFM69_CLKOUT_DIV16,
+	RFM69_CLKOUT_DIV32,
+	RFM69_CLKOUT_RC,
+	RFM69_CLKOUT_OFF
+}RFM69_ClkOut_t;
 
 typedef enum RFM69_BasicMode_e
 {
@@ -130,6 +170,16 @@ typedef enum RFM69_BasicMode_e
 	RFM69_RECEIVE_MODE = 4,
 	RFM69_LISTEN_MODE = 8,
 }RFM69_BasicMode_t;
+
+typedef enum RFM69_IntermediateMode_e
+{
+	mode,
+}RFM69_IntermediateMode_t;
+
+typedef enum RFM69_ModeSwichCondition_e
+{
+	mode12
+}RFM69_ModeSwichCondition_t;
 
 typedef enum RFM69_ModulationType_t
 {
@@ -144,7 +194,7 @@ typedef enum RFM69_AddressFilterMode_e
 	RFM69_ADDRESS_FILTERING_BC = 2
 }RFM69_AddressFilterMode_t;
 
-typedef enum RFM69_BitRate_t
+typedef enum RFM69_BitRate_e
 {
 	RFM69_BR_1k2 = 0,
 	RFM69_BR_2k4,
@@ -156,7 +206,23 @@ typedef enum RFM69_BitRate_t
 	RFM69_BR_250,
 	RFM69_BR_300,
 	RFM69_NUM_BITRATES
-}RFM69_BitRate_e;
+}RFM69_BitRate_t;
+
+typedef enum RFM69_DIOMapping_e
+{
+	DIO_MAPPING_0 = 0,
+	DIO_MAPPING_1 = 1,
+	DIO_MAPPING_2 = 2,
+	DIO_MAPPING_3 = 3
+}RFM69_DIOMapping_t;
+
+typedef enum RFM69_DCFreeMode_e
+{
+	RFM69_DCFREE_NONE = 0,
+	RFM69_DCFREE_MANCHESTER = 1,
+	RFM69_DCFREE_WHITENING = 2
+}RFM69_DCFreeMode_t;
+
 
 #endif /* RFM69_SUPPORT */
 #endif /* HARDWARE_RADIO_RFM69_RFM69CW_HW_H_ */

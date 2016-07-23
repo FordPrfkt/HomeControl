@@ -23,6 +23,8 @@
 #ifndef HARDWARE_RADIO_RFM69_RFM69_H_
 #define HARDWARE_RADIO_RFM69_RFM69_H_
 
+#include <stdint.h>
+#include <stdbool.h>
 #include "config.h"
 #include "rfm69cw_hw.h"
 
@@ -35,24 +37,29 @@ typedef enum RFM69_ModuleID_e
 }RFM69_ModuleID_t;
 
 void RFM69_init(void);
+void RFM69_periodic(void);
 void RFM69_setMode(RFM69_ModuleID_t module, RFM69_BasicMode_t mode);
-uint8_t RFM69_getTemperature(RFM69_ModuleID_t module);
+void RFM69_setAutoMode(RFM69_ModuleID_t module, RFM69_IntermediateMode_t mode, RFM69_ModeSwichCondition_t enterCondition, RFM69_ModeSwichCondition_t leaveCondition);
+void RFM69_setBitrate(uint8_t module, RFM69_BitRate_t mode);
+void RFM69_setSyncWord(uint8_t module, uint8_t syncWord[], uint8_t length);
+void RFM69_setSyncMode(uint8_t module, bool syncOn);
+void RFM69_setAddressFiltering(uint8_t module, RFM69_AddressFilterMode_t mode, uint8_t address, uint8_t broadcastAddress);
+void RFM69_setAESKey(uint8_t module, uint8_t aesKey[]);
+void RFM69_configureAES(uint8_t module, bool aesEnable);
+void RFM69_setPacketFormat(uint8_t module, uint8_t format, uint8_t payLoadLen);
 void RFM69_calibrateOSC(RFM69_ModuleID_t module);
+uint8_t RFM69_getTemperature(RFM69_ModuleID_t module);
+uint8_t RFM69_getVersion(uint8_t module);
+void RFM69_setModulation(uint8_t module, RFM69_ModulationType_e modulation);
+uint8_t RFM69_getRSSI(uint8_t module, bool forceCalc);
 
-void rfm69_setModulation(uint8_t module, uint8_t mode);
 void rfm69_setPower(uint8_t module, uint8_t power);
 void rfm69_setFreqency(uint8_t module, uint8_t freq);
-void rfm69_setBitRate(uint8_t module, uint8_t freq);
-void rfm69_setSyncWord(uint8_t module, uint8_t syncWord);
-void rfm69_enableEncyption(uint8_t module, uint8_t aesKey);
+
 void rfm69_standby(uint8_t module, uint8_t listenCriteria);
 void rfm69_sleep(uint8_t module);
-void rfm69_startOscCal(uint8_t module);
 void rfm69_startRSSI(uint8_t module);
 uint8_t rfm69_getRSSI(uint8_t module);
-
-void rfm69_transmit(uint8_t module, uint8_t data);
-void rfm69_receive(uint8_t module, uint8_t *data);
 
 #ifdef DEBUG_RFM69
 #include "core/debug.h"
