@@ -38,28 +38,28 @@ typedef enum RFM69_ModuleID_e
 
 void RFM69_init(void);
 void RFM69_periodic(void);
-void RFM69_setMode(RFM69_ModuleID_t module, RFM69_BasicMode_t mode);
+void RFM69_sleepMode(RFM69_ModuleID_t module);
+void RFM69_standbyMode(RFM69_ModuleID_t module);
+void RFM69_rxMode(RFM69_ModuleID_t module);
+void RFM69_txMode(RFM69_ModuleID_t module);
+void RFM69_listenMode(RFM69_ModuleID_t module, RFM69CW_ListModeConf_t *listenModeConf);
 void RFM69_setAutoMode(RFM69_ModuleID_t module, RFM69_IntermediateMode_t mode, RFM69_ModeSwichCondition_t enterCondition, RFM69_ModeSwichCondition_t leaveCondition);
+void RFM69_setFreqency(uint8_t module, uint32_t freq);
+void RFM69_setOutputPower(uint8_t module, uint8_t power);
 void RFM69_setBitrate(uint8_t module, RFM69_BitRate_t mode);
 void RFM69_setSyncWord(uint8_t module, uint8_t syncWord[], uint8_t length);
 void RFM69_setSyncMode(uint8_t module, bool syncOn);
-void RFM69_setAddressFiltering(uint8_t module, RFM69_AddressFilterMode_t mode, uint8_t address, uint8_t broadcastAddress);
+void RFM69_setAddress(uint8_t module, RFM69_AddressFilterMode_t mode, uint8_t address, uint8_t broadcastAddress);
 void RFM69_setAESKey(uint8_t module, uint8_t aesKey[]);
 void RFM69_configureAES(uint8_t module, bool aesEnable);
 void RFM69_setPacketFormat(uint8_t module, uint8_t format, uint8_t payLoadLen);
+void RFM69_setModulation(uint8_t module, RFM69_ModulationType_e modulation);
+uint8_t RFM69_getRSSI(uint8_t module, bool forceCalc);
+void RFM69_transmit(uint8_t module, uint8_t data[], uint8_t dataLen);
+void RFM69_receive(uint8_t module, uint8_t data[], uint8_t dataLen);
 void RFM69_calibrateOSC(RFM69_ModuleID_t module);
 uint8_t RFM69_getTemperature(RFM69_ModuleID_t module);
 uint8_t RFM69_getVersion(uint8_t module);
-void RFM69_setModulation(uint8_t module, RFM69_ModulationType_e modulation);
-uint8_t RFM69_getRSSI(uint8_t module, bool forceCalc);
-
-void rfm69_setPower(uint8_t module, uint8_t power);
-void rfm69_setFreqency(uint8_t module, uint8_t freq);
-
-void rfm69_standby(uint8_t module, uint8_t listenCriteria);
-void rfm69_sleep(uint8_t module);
-void rfm69_startRSSI(uint8_t module);
-uint8_t rfm69_getRSSI(uint8_t module);
 
 #ifdef DEBUG_RFM69
 #include "core/debug.h"
@@ -67,6 +67,12 @@ uint8_t rfm69_getRSSI(uint8_t module);
 #else
 #define RFM69_DEBUG(a...)
 #endif
+
+#define HOOK_NAME rfm69_dataReceived
+#define HOOK_ARGS (uint8_t data[], uint8_t dataLen)
+#include "hook.def"
+#undef HOOK_NAME
+#undef HOOK_ARGS
 
 #endif /* RFM69_SUPPORT */
 #endif /* HARDWARE_RADIO_RFM69_RFM69_H_ */

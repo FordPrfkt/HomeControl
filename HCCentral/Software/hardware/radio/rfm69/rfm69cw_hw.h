@@ -113,9 +113,12 @@
 #define RFM69_FXOSC (32u)
 #define RFM69_FSTEP (61u)
 #define RFM69_AESKEYLEN (16)
+#define RFM69CW_MAX_PACKETSIZE (66)
+#define RFM69CW_SPI_WRITE_FLAG (0x80)
 
 /* Bit positions */
 #define RFM69CW_OPMODE_MODE (2)
+#define RFM69CW_OPMODE_MODE_MASK (2)
 #define RFM69CW_OPMODE_LISTENON (6)
 
 #define RFM69CW_DATAMODUL_MODULATIONTYPE (3)
@@ -138,6 +141,7 @@
 
 #define RFM69CW_PACKETCONF_DCFREE (5)
 #define RFM69CW_PACKETCONF_DCFREE_MASK (3)
+#define RFM69CW_PACKETCONF2_AESON (0)
 
 #define RFM69CW_AFCFEI_FEIDONE (6)
 #define RFM69CW_AFCFEI_FEISTART (5)
@@ -147,6 +151,22 @@
 #define RFM69CW_AFCFEI_AFCCLEAR (1)
 #define RFM69CW_AFCFEI_AFCSTART (0)
 
+#define RFM69CW_LISTEN1_LISTENRESOLIDLE (6)
+#define RFM69CW_LISTEN1_LISTENRESOLRX (4)
+#define RFM69CW_LISTEN1_LISTENCRITERIA (3)
+#define RFM69CW_LISTEN1_LISTENEND (1)
+
+/* Setting structs */
+typedef struct RFM69CW_ListModeConf_s
+{
+	uint8_t listenCoefIdle;
+	uint8_t listenResolIdle;
+	uint8_t listenCoefRx;
+	uint8_t listenResolRx;
+	bool syncAddrMatch;
+	RFM69_ListenEnd_t listenEnd;
+	RFM69_BasicMode_t listenEndMode;
+}RFM69CW_ListModeConf_t;
 
 /* Setting values */
 typedef enum RFM69_ClkOut_e
@@ -223,6 +243,11 @@ typedef enum RFM69_DCFreeMode_e
 	RFM69_DCFREE_WHITENING = 2
 }RFM69_DCFreeMode_t;
 
-
+typedef enum RFM69_ListenEnd_e
+{
+	RFM69_LISTENEND_RX = 0,
+	RFM69_LISTENEND_RX_WAIT = 1,
+	RFM69_LISTENEND_RESUME = 2
+}RFM69_ListenEnd_t;
 #endif /* RFM69_SUPPORT */
 #endif /* HARDWARE_RADIO_RFM69_RFM69CW_HW_H_ */

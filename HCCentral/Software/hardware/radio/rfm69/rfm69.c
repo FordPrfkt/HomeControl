@@ -20,6 +20,13 @@
 * http://www.gnu.org/copyleft/gpl.html
 */
 
+/* Enable the hook rfm69_dataReceived */
+#define HOOK_NAME rfm69_dataReceived
+#define HOOK_ARGS (uint8_t data[], uint8_t dataLen)
+#define HOOK_COUNT 3
+#define HOOK_ARGS_CALL (data, dataLen)
+#define HOOK_IMPLEMENT 1
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -39,6 +46,7 @@
 
 #define RFM69_NUM_MODULES 1
 #define _BV(x) (1 << x)
+#define MASK(x, y) (x << y)
 
 static const uint16_t rfm69Bitrate_Values[RFM69_NUM_BITRATES] = {
 		0x682B, /* RFM69_BR_1k2 */
@@ -54,6 +62,7 @@ static const uint16_t rfm69Bitrate_Values[RFM69_NUM_BITRATES] = {
 
 static uint8_t rfm69_blinkCtr = 0;
 
+static void rfm69_setMode(RFM69_ModuleID_t module, RFM69_BasicMode_t mode);
 static void rfm69_select(RFM69_ModuleID_t module);
 static void rfm69_deselect(RFM69_ModuleID_t module);
 static uint8_t rfm69_regRead(RFM69_ModuleID_t module, uint8_t reg);
@@ -62,11 +71,13 @@ static void rfm69_reset(RFM69_ModuleID_t module);
 static void rfm69_getInterruptFlags(RFM69_ModuleID_t module, uint16_t *irqFlags);
 static void rfm69_blinkLED(RFM69_ModuleID_t module);
 
+/* TODO: Interrupts + Hook */
+/* rfm69_dataReceived_call(data, dataLen); */
+
 void RFM69_init(void)
 {
 	uint8_t ctr;
 	uint8_t temp;
-	RFM69_DEBUG("Initialize.\n");
 
 	PIN_SET(SPI_CS_RFM69_0);
 	PIN_SET(SPI_CS_RFM69_1);
@@ -117,46 +128,74 @@ void RFM69_init(void)
 		 *  */
 	}
 
-	/* TODO: Sleep Mode */
-
 	RFM69_DEBUG("Init Done\n");
 }
 
-void RFM69_setMode(RFM69_ModuleID_t module, RFM69_BasicMode_t mode)
+inline void RFM69_sleepMode(RFM69_ModuleID_t module)
 {
-	uint8_t regOpMode;
-
-	regOpMode = rfm69_regRead(module, RFM69_REGOPMODE);
-
-	regOpMode &= 0x80;
-	regOpMode |= ((mode & 0x07) << 2);
-
-	if (RFM69_LISTEN_MODE == mode)
-	{
-		regOpMode |= 0x20; /* RFM69_REGOPMODE_LISTENON */
-	}
-	else
-	{
-		regOpMode |= 0x10; /* RFM69_REGOPMODE_LISTENABORT */
-	}
-
-	rfm69_regWrite(module, RFM69_REGOPMODE, regOpMode);
-
-	/* TODO: Wait for mode ready */
-
-	RFM69_DEBUG("Mode set to %i\n", mode);
+	rfm69_setMode(RFM69_SLEEP_MODE);
 }
 
-void RFM69_setAutoMode(RFM69_ModuleID_t module, RFM69_IntermediateMode_t mode,
-		RFM69_ModeSwichCondition_t enterCondition, RFM69_ModeSwichCondition_t leaveCondition)
+inline void RFM69_standbyMode(RFM69_ModuleID_t module)
+{
+	rfm69_setMode(RFM69_STANDBY_MODE);
+}
+
+inline void RFM69_rxMode(RFM69_ModuleID_t module)
+{
+	rfm69_setMode(RFM69_RECEIVE_MODE);
+}
+
+inline void RFM69_txMode(RFM69_ModuleID_t module)
+{
+	rfm69_setMode(RFM69_TRANSMIT_MODE);
+}
+
+void RFM69_listenMode(RFM69_ModuleID_t module, RFM69CW_ListModeConf_t *listenModeConf)
+{
+	uint8_t reg;
+
+	reg = listenModeConf->listenResolIdle << RFM69CW_LISTEN1_LISTENRESOLIDLE;
+	reg |= listenModeConf->listenResolRx << RFM69CW_LISTEN1_LISTENRESOLRX;
+	reg |= listenModeConf->syncAddrMatch << RFM69CW_LISTEN1_LISTENCRITERIA;
+	reg |= listenModeConf->listenEnd << RFM69CW_LISTEN1_LISTENEND;
+
+	rfm69_select(module);
+	SPI_SEND(RFM69_REGLISTEN1 | RFM69CW_SPI_WRITE_FLAG);
+	SPI_SEND(reg);
+	SPI_SEND(listenModeConf->listenCoefIdle);
+	SPI_SEND(listenModeConf->listenCoefRx);
+	rfm69_deselect(module);
+
+	rfm69_setMode(RFM69_LISTEN_MODE);
+
+	reg = rfm69_regRead(module, RFM69_REGOPMODE);
+	reg &= ~(RFM69CW_OPMODE_MODE_MASK << RFM69CW_OPMODE_MODE);
+	reg |= listenModeConf->listenEndMode << RFM69CW_OPMODE_MODE;
+	rfm69_regWrite(module, RFM69_REGOPMODE, reg);
+}
+
+void RFM69_setAutoMode(RFM69_ModuleID_t module,
+		RFM69_IntermediateMode_t mode,
+		RFM69_ModeSwichCondition_t enterCondition,
+		RFM69_ModeSwichCondition_t leaveCondition)
+{
+
+}
+
+void RFM69_setFreqency(uint8_t module, uint32_t freq)
+{
+
+}
+
+void RFM69_setOutputPower(uint8_t module, uint8_t power)
 {
 
 }
 
 void RFM69_setBitrate(uint8_t module, RFM69_BitRate_t mode)
 {
-	/* RxBW anpassen! */
-	/* Afc ein/ausschalten, ggf LO offset anpassen */
+
 }
 
 void RFM69_setSyncWord(uint8_t module, uint8_t syncWord[], uint8_t length)
@@ -173,7 +212,7 @@ void RFM69_setSyncWord(uint8_t module, uint8_t syncWord[], uint8_t length)
 
 	rfm69_select(module);
 
-	SPI_SEND(RFM69_REGSYNCCONFIG);
+	SPI_SEND(RFM69_REGSYNCCONFIG | RFM69CW_SPI_WRITE_FLAG);
 	SPI_SEND(regSyncCfg);
 
 	for (ctr = 0; ctr < length; ctr++)
@@ -202,7 +241,7 @@ void RFM69_setSyncMode(uint8_t module, bool syncOn)
 	rfm69_regWrite(module, RFM69_REGSYNCCONFIG, regSyncCfg);
 }
 
-void RFM69_setAddressFiltering(uint8_t module, RFM69_AddressFilterMode_t mode, uint8_t address, uint8_t broadcastAddress)
+void RFM69_setAddress(uint8_t module, RFM69_AddressFilterMode_t mode, uint8_t address, uint8_t broadcastAddress)
 {
 	uint8_t regPacketConf;
 
@@ -219,18 +258,25 @@ void RFM69_setAESKey(uint8_t module, uint8_t aesKey[])
 
 	rfm69_select(module);
 
-	SPI_SEND(RFM69_REGAESKEY1);
+	SPI_SEND(RFM69_REGAESKEY1 | RFM69CW_SPI_WRITE_FLAG);
 	for (ctr = 0; ctr < RFM69_AESKEYLEN; ctr++)
 	{
 		SPI_SEND(aesKey[ctr]);
 	}
 
 	rfm69_deselect(module);
+	rfm69_blinkLED(module);
 }
 
 void RFM69_configureAES(uint8_t module, bool aesEnable)
 {
+	uint8_t regPacketConf;
 
+	regPacketConf = rfm69_regRead(module, RFM69_REGPACKETCONFIG2);
+	regPacketConf &= ~_BV(RFM69CW_PACKETCONF2_AESON);
+	regPacketConf |= (aesEnable << RFM69CW_PACKETCONF2_AESON);
+
+	rfm69_regWrite(module, RFM69_REGPACKETCONFIG2, regPacketConf);
 }
 
 void RFM69_setPacketFormat(uint8_t module, uint8_t format, uint8_t payLoadLen)
@@ -275,11 +321,48 @@ uint8_t RFM69_getRSSI(uint8_t module, bool forceCalc)
 
 void RFM69_transmit(uint8_t module, uint8_t data[], uint8_t dataLen)
 {
+	uint8_t ctr;
 
+	/* TODO: Switch to TX Mode
+	 * TODO: Set PacketLength
+	 * Check for 64 Bytes in AES Mode
+	 */
+
+	/* TODO: Write until datLen or Fifo Full interrupt.
+	 * If Datalen then not reached, tx then continue
+	 * Large Packet Handling from Manual*/
+
+	rfm69_select(module);
+
+	SPI_SEND(RFM69_REGFIFO | RFM69CW_SPI_WRITE_FLAG);
+	for (ctr = 0; ctr < dataLen; ctr++)
+	{
+		SPI_SEND(data[ctr]);
+	}
+
+	rfm69_deselect(module);
+	rfm69_blinkLED(module);
 }
 
 void RFM69_receive(uint8_t module, uint8_t data[], uint8_t dataLen)
 {
+	uint8_t ctr;
+
+	/* TODO: Check PacketLength */
+
+	if (dataLen <= RFM69CW_MAX_PACKETSIZE)
+	{
+		rfm69_select(module);
+
+		SPI_SEND(RFM69_REGFIFO & (~RFM69CW_SPI_WRITE_FLAG));
+		for (ctr = 0; ctr < dataLen; ctr++)
+		{
+			data[ctr] = SPI_RECV();
+		}
+
+		rfm69_deselect(module);
+		rfm69_blinkLED(module);
+	}
 }
 
 void RFM69_calibrateOSC(RFM69_ModuleID_t module)
@@ -328,6 +411,31 @@ uint8_t RFM69_getVersion(uint8_t module)
 	return rfm69_regRead(module, RFM69_REGVERSION);
 }
 
+void rfm69_setMode(RFM69_ModuleID_t module, RFM69_BasicMode_t mode)
+{
+	uint8_t regOpMode;
+
+	regOpMode = rfm69_regRead(module, RFM69_REGOPMODE);
+
+	regOpMode &= 0x80;
+	regOpMode |= ((mode & 0x07) << 2);
+
+	if (RFM69_LISTEN_MODE == mode)
+	{
+		regOpMode |= 0x20; /* RFM69_REGOPMODE_LISTENON */
+	}
+	else
+	{
+		regOpMode |= 0x10; /* RFM69_REGOPMODE_LISTENABORT */
+	}
+
+	rfm69_regWrite(module, RFM69_REGOPMODE, regOpMode);
+
+	/* TODO: Wait for mode ready */
+
+	RFM69_DEBUG("Mode set to %i\n", mode);
+}
+
 void rfm69_select(RFM69_ModuleID_t module)
 {
 	if (RFM69_MOD_433 == module)
@@ -365,7 +473,7 @@ uint8_t rfm69_regRead(RFM69_ModuleID_t module, uint8_t reg)
 	uint8_t result;
 
 	rfm69_select(module);
-	reg &= 0x7F;
+	reg &= ~RFM69CW_SPI_WRITE_FLAG;
 	SPI_SEND(reg);
 	result = SPI_RECV();
 	rfm69_deselect(module);
@@ -378,7 +486,7 @@ uint8_t rfm69_regRead(RFM69_ModuleID_t module, uint8_t reg)
 void rfm69_regWrite(RFM69_ModuleID_t module, uint8_t reg, uint8_t data)
 {
 	rfm69_select(module);
-	reg |= 0x80;
+	reg |= RFM69CW_SPI_WRITE_FLAG;
 	SPI_SEND(reg);
 	SPI_SEND(data);
 	rfm69_deselect(module);
@@ -389,7 +497,7 @@ void rfm69_regWrite(RFM69_ModuleID_t module, uint8_t reg, uint8_t data)
 void rfm69_getInterruptFlags(RFM69_ModuleID_t module, uint16_t *irqFlags)
 {
 	rfm69_select(module);
-	SPI_SEND(RFM69_REGIRQFLAGS1);
+	SPI_SEND(RFM69_REGIRQFLAGS1 & (~RFM69CW_SPI_WRITE_FLAG));
 	*irqFlags = SPI_RECV();
 	*irqFlags |= SPI_RECV() << 8;
 	rfm69_deselect(module);
