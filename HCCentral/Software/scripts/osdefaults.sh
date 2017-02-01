@@ -28,7 +28,7 @@ case "$THIS_OS" in
 		;;
 	MINGW*)
 		AWK=gawk
-		SED=gsed
+		SED=sed
 		M4=m4
 		;;
 		*)

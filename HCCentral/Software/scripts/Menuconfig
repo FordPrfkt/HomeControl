@@ -1048,7 +1048,7 @@ EOM
 
 		case "$ret" in
 		0|3|4|5|6)
-			defaults="$selection$defaults"  #pseudo stack
+			defaults="$selection $defaults"  #pseudo stack
 			case "$ret" in
 			0) eval $selection   ;;
 			3) eval $selection y ;;
@@ -1056,7 +1056,7 @@ EOM
 			5) eval $selection m ;;
 			6) eval $selection c ;;
 			esac
-			default="${defaults%%*}" defaults="${defaults#*}"
+			default="${defaults%% *}" defaults="${defaults# *}"
 			;;
 		2)	
 			default="${selection%%\ *}"
@@ -1708,7 +1708,7 @@ then
 	echo
 else
 	echo
-    	echo 
+    	echo  
 	echo Your Ethersex configuration changes were NOT saved.
 	echo
 fi
