@@ -27,7 +27,51 @@
 
 #include "protocols/ecmd/ecmd-base.h"
 
+#define RFM69_MODULE_COUNT 2
+
+int16_t parse_cmd_rfm69_status(char *cmd, char *output, uint16_t len)
+{
+  uint8_t module;
+  uint16_t s = 0;
+
+  if ((1 != sscanf_P(cmd, PSTR("%hhu"), &module)) ||
+      (module >= RFM69_MODULE_COUNT))
+    return ECMD_ERR_PARSE_ERROR;
+
+  return ECMD_FINAL(snprintf_P(output, len, PSTR("rfm69 status: %04x"), s));
+}
+
+int16_t parse_cmd_rfm69_getrssi(char *cmd, char *output, uint16_t len)
+{
+  uint8_t module;
+  uint16_t s = 0;
+
+  if ((1 != sscanf_P(cmd, PSTR("%hhu"), &module)) ||
+      (module >= RFM69_MODULE_COUNT))
+    return ECMD_ERR_PARSE_ERROR;
+
+  return ECMD_FINAL(snprintf_P(output, len, PSTR("rfm69 status: %04x"), s));
+}
+
+int16_t parse_cmd_rfm69_reset(char *cmd, char *output, uint16_t len)
+{
+  uint8_t module;
+  uint16_t s = 0;
+
+  if ((1 != sscanf_P(cmd, PSTR("%hhu"), &module)) ||
+      (module >= RFM69_MODULE_COUNT))
+    return ECMD_ERR_PARSE_ERROR;
+
+  return ECMD_FINAL(snprintf_P(output, len, PSTR("rfm69 status: %04x"), s));
+}
+
 /*
   -- Ethersex META --
-  block(RFM69 Radio)
+  block([[RFM69]])
+  ecmd_feature(rfm69_status, "rfm69 status", MODULE, Display internal status of MODULE.)
+  ecmd_feature(rfm69_getrssi, "rfm69 getdrssi", MODULE, Get the current RSSI of MODULE.)
+
+  ecmd_ifdef(RFM69_433_USE_RESET)
+    ecmd_feature(rfm69_reset, "rfm69 reset", , Re-initialize the RFM69 module.)
+  ecmd_endif()
 */

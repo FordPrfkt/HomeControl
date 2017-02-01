@@ -6,12 +6,8 @@ dep_bool_menu "RFM69" RFM69_SUPPORT $ARCH_AVR $SPI
 
     dep_bool "433MHz" RFM69_433_SUPPORT $RFM69_SUPPORT
     if [ "$RFM69_433_SUPPORT" = "y" -o $RFM69S -gt $RFM69S_USED ]; then
-
-      if [ "$RFM69_433_SUPPORT" = "y" ]; then
-       choice "  RFM69 select" "$(rfm69_choice RFM69_433)"
-       rfm69_process_choice RFM69_433
-      fi
-      
+      #choice '  RFM69 select' "$(rfm69_choice RFM69_MODULE_433)"
+      rfm69_process_choice RFM69_MODULE_433      
       dep_bool "Use Reset" RFM69_433_USE_RESET $RFM69_433_SUPPORT
       dep_bool "Use activity LED" RFM69_433_USE_LED $RFM69_433_SUPPORT
     else
@@ -22,12 +18,8 @@ dep_bool_menu "RFM69" RFM69_SUPPORT $ARCH_AVR $SPI
     
     dep_bool "866MHz" RFM69_866_SUPPORT $RFM69_SUPPORT
     if [ "$RFM69_866_SUPPORT" = "y" -o $RFM69S -gt $RFM69S_USED ]; then
-
-      if [ "$RFM69_866_SUPPORT" = "y" ]; then
-        choice "  RFM69 select" "$(rfm69_choice RFM69_866)"
-        rfm12_process_choice RFM69_866
-      fi
-
+      #choice '  RFM69 select' "$(rfm69_choice RFM69_MODULE_866)"
+      rfm12_process_choice RFM69_MODULE_866
       dep_bool "Use Reset" RFM69_866_USE_RESET $RFM69_866_SUPPORT
       dep_bool "Use activity LED" RFM69_866_USE_LED $RFM69_866_SUPPORT
     else

@@ -116,6 +116,8 @@
 #define RFM69CW_MAX_PACKETSIZE (66)
 #define RFM69CW_SPI_WRITE_FLAG (0x80)
 
+#define RFM69CW_FSTEP (1u)
+
 /* Bit positions */
 #define RFM69CW_OPMODE_MODE (2)
 #define RFM69CW_OPMODE_MODE_MASK (2)
@@ -157,6 +159,23 @@
 #define RFM69CW_LISTEN1_LISTENEND (1)
 
 /* Setting structs */
+typedef enum RFM69_BasicMode_e
+{
+	RFM69_SLEEP_MODE = 0,
+	RFM69_STANDBY_MODE = 1,
+	RFM69_FS_MODE = 2,
+	RFM69_TRANSMIT_MODE = 3,
+	RFM69_RECEIVE_MODE = 4,
+	RFM69_LISTEN_MODE = 8,
+}RFM69_BasicMode_t;
+
+typedef enum RFM69_ListenEnd_e
+{
+	RFM69_LISTENEND_RX = 0,
+	RFM69_LISTENEND_RX_WAIT = 1,
+	RFM69_LISTENEND_RESUME = 2
+}RFM69_ListenEnd_t;
+
 typedef struct RFM69CW_ListModeConf_s
 {
 	uint8_t listenCoefIdle;
@@ -181,16 +200,6 @@ typedef enum RFM69_ClkOut_e
 	RFM69_CLKOUT_OFF
 }RFM69_ClkOut_t;
 
-typedef enum RFM69_BasicMode_e
-{
-	RFM69_SLEEP_MODE = 0,
-	RFM69_STANDBY_MODE = 1,
-	RFM69_FS_MODE = 2,
-	RFM69_TRANSMIT_MODE = 3,
-	RFM69_RECEIVE_MODE = 4,
-	RFM69_LISTEN_MODE = 8,
-}RFM69_BasicMode_t;
-
 typedef enum RFM69_IntermediateMode_e
 {
 	mode,
@@ -199,7 +208,7 @@ typedef enum RFM69_IntermediateMode_e
 typedef enum RFM69_ModeSwichCondition_e
 {
 	mode12
-}RFM69_ModeSwichCondition_t;
+}RFM69_ModeSwitchCondition_t;
 
 typedef enum RFM69_ModulationType_t
 {
@@ -216,16 +225,15 @@ typedef enum RFM69_AddressFilterMode_e
 
 typedef enum RFM69_BitRate_e
 {
-	RFM69_BR_1k2 = 0,
-	RFM69_BR_2k4,
-	RFM69_BR_9k6,
-	RFM69_BR_12k5,
-	RFM69_BR_25,
-	RFM69_BR_50,
-	RFM69_BR_150,
-	RFM69_BR_250,
-	RFM69_BR_300,
-	RFM69_NUM_BITRATES
+	RFM69_BR_1k2 = 0x682B,
+	RFM69_BR_2k4 = 0x3415,
+	RFM69_BR_9k6 = 0x0D05,
+	RFM69_BR_12k5 = 0x0A00,
+	RFM69_BR_25 = 0x0500,
+	RFM69_BR_50 = 0x0280,
+	RFM69_BR_150 = 0x00D5,
+	RFM69_BR_250 = 0x0080,
+	RFM69_BR_300 = 0x006B
 }RFM69_BitRate_t;
 
 typedef enum RFM69_DIOMapping_e
@@ -243,11 +251,5 @@ typedef enum RFM69_DCFreeMode_e
 	RFM69_DCFREE_WHITENING = 2
 }RFM69_DCFreeMode_t;
 
-typedef enum RFM69_ListenEnd_e
-{
-	RFM69_LISTENEND_RX = 0,
-	RFM69_LISTENEND_RX_WAIT = 1,
-	RFM69_LISTENEND_RESUME = 2
-}RFM69_ListenEnd_t;
 #endif /* RFM69_SUPPORT */
 #endif /* HARDWARE_RADIO_RFM69_RFM69CW_HW_H_ */

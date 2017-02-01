@@ -38,18 +38,21 @@ typedef enum RFM69_ModuleID_e
 
 void RFM69_init(void);
 void RFM69_periodic(void);
+void RFM69_reset(RFM69_ModuleID_t module);
 void RFM69_sleepMode(RFM69_ModuleID_t module);
 void RFM69_standbyMode(RFM69_ModuleID_t module);
 void RFM69_rxMode(RFM69_ModuleID_t module);
 void RFM69_txMode(RFM69_ModuleID_t module);
 void RFM69_listenMode(RFM69_ModuleID_t module, RFM69CW_ListModeConf_t *listenModeConf);
-void RFM69_setAutoMode(RFM69_ModuleID_t module, RFM69_IntermediateMode_t mode, RFM69_ModeSwichCondition_t enterCondition, RFM69_ModeSwichCondition_t leaveCondition);
-void RFM69_setFreqency(uint8_t module, uint32_t freq);
+void RFM69_setAutoMode(RFM69_ModuleID_t module, RFM69_IntermediateMode_t mode, RFM69_ModeSwitchCondition_t enterCondition, RFM69_ModeSwitchCondition_t leaveCondition);
+void RFM69_setFrequency(RFM69_ModuleID_t module, uint32_t frequency);
+void RFM69_setFrequencyDeviation(RFM69_ModuleID_t module, uint16_t frequency);
 void RFM69_setOutputPower(uint8_t module, uint8_t power);
 void RFM69_setBitrate(uint8_t module, RFM69_BitRate_t mode);
 void RFM69_setSyncWord(uint8_t module, uint8_t syncWord[], uint8_t length);
 void RFM69_setSyncMode(uint8_t module, bool syncOn);
 void RFM69_setAddress(uint8_t module, RFM69_AddressFilterMode_t mode, uint8_t address, uint8_t broadcastAddress);
+void RFM69_promiscousMode(bool enable);
 void RFM69_setAESKey(uint8_t module, uint8_t aesKey[]);
 void RFM69_configureAES(uint8_t module, bool aesEnable);
 void RFM69_setPacketFormat(uint8_t module, uint8_t format, uint8_t payLoadLen);
