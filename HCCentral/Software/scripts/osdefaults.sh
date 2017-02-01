@@ -26,7 +26,12 @@ case "$THIS_OS" in
 		SED=sed
 		M4=m4
 		;;
-	*)
+	MINGW*)
+		AWK=gawk
+		SED=gsed
+		M4=m4
+		;;
+		*)
 		echo "$0: Unknown Platform. Trying to use GNU-userland." >2
 		;;
 esac
